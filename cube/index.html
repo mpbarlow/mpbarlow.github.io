@@ -1,0 +1,186 @@
+<html>
+  <head>
+    <link
+      href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .cube {
+        position: relative;
+        transition: transform 2s linear;
+        transform-style: preserve-3d;
+      }
+
+      .face {
+        width: 200px;
+        height: 200px;
+        position: absolute;
+        top: calc(50% - 100px);
+        left: calc(50% - 100px);
+        transition: transform 1s ease;
+      }
+
+      .inner-face {
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        top: calc(50% - 50px);
+        left: calc(50% - 50px);
+        background-size: contain;
+        background-position: center center;
+        background-repeat: no-repeat;
+      }
+
+      .top {
+        transform: translateY(-100px) rotateX(90deg);
+      }
+      .bottom {
+        transform: translateY(100px) rotateX(-90deg);
+      }
+      .left {
+        transform: translateX(-100px) rotateY(-90deg);
+      }
+      .right {
+        transform: translateX(100px) rotateY(90deg);
+      }
+      .front {
+        transform: translateZ(100px) rotateY(0);
+      }
+      .back {
+        transform: translateZ(-100px) rotateY(180deg);
+      }
+
+      .top.exploded {
+        transform: translateY(-200px) rotateX(90deg);
+      }
+      .bottom.exploded {
+        transform: translateY(200px) rotateX(-90deg);
+      }
+      .left.exploded {
+        transform: translateX(-200px) rotateY(-90deg);
+      }
+      .right.exploded {
+        transform: translateX(200px) rotateY(90deg);
+      }
+      .front.exploded {
+        transform: translateZ(200px) rotateY(0);
+      }
+      .back.exploded {
+        transform: translateZ(-200px) rotateY(180deg);
+      }
+
+      .inner-top {
+        transform: translateY(-50px) rotateX(90deg);
+        background-image: url('./assets/vue.png');
+      }
+      .inner-bottom {
+        transform: translateY(50px) rotateX(-90deg);
+        background-image: url('./assets/laravel.png');
+      }
+      .inner-left {
+        transform: translateX(-50px) rotateY(-90deg);
+        background-image: url('./assets/vue.png');
+      }
+      .inner-right {
+        transform: translateX(50px) rotateY(90deg);
+        background-image: url('./assets/vue.png');
+      }
+      .inner-front {
+        transform: translateZ(50px) rotateY(0);
+        background-image: url('./assets/laravel.png');
+      }
+      .inner-back {
+        transform: translateZ(-50px) rotateY(180deg);
+        background-image: url('./assets/laravel.png');
+      }
+    </style>
+  </head>
+  <body class="bg-gray-300">
+    <div id="viewport" class="container mx-auto p-6 h-screen flex">
+      <div class="controls flex flex-col mr-2">
+        <button type="button" id="play">⏩</button>
+        <button type="button" id="pause">⏸️</button>
+        <button type="button" id="reset">⏪</button>
+        <button type="button" id="explode">💥</button>
+      </div>
+      <div class="inner border w-full h-full bg-white rounded shadow flex justify-center items-center">
+        <div id="cube" class="cube">
+          <div class="top face opacity-75 border border-black bg-blue-500"></div>
+          <div class="front face opacity-75 border border-black bg-red-500"></div>
+          <div class="back face opacity-75 border border-black bg-green-500"></div>
+          <div class="left face opacity-75 border border-black bg-purple-500"></div>
+          <div class="right face opacity-75 border border-black bg-teal-500"></div>
+          <div class="bottom face opacity-75 border border-black bg-orange-500"></div>
+
+          <div class="inner-top inner-face border border-black"></div>
+          <div class="inner-front inner-face border border-black"></div>
+          <div class="inner-back inner-face border border-black"></div>
+          <div class="inner-left inner-face border border-black"></div>
+          <div class="inner-right inner-face border border-black"></div>
+          <div class="inner-bottom inner-face border border-black"></div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const vp = document.getElementById('viewport')
+      const cube = document.getElementById('cube')
+      let exploded = false
+
+      function setViewport() {
+        const w = window.innerWidth
+        const h = window.innerHeight
+
+        const perspective = Math.pow((w/2 * w/2) + (h/2 * h/2), 0.5) / Math.tan(30 * Math.PI / 180)
+
+        vp.style.perspective = `${perspective}px`
+      }
+
+      function getRotation() {
+        const x = Math.round(Math.random() * 360)
+        const y = Math.round(Math.random() * 360)
+        const z = Math.round(Math.random() * 360)
+
+        return `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg)`
+      }
+
+      function startRotate() {
+        cube.style.transform = getRotation()
+
+        return window.rotateInterval || setInterval(() => {
+          cube.style.transform = getRotation()
+        }, 2000)
+      }
+
+      function reset() {
+        clearInterval(window.rotateInterval)
+        window.rotateInterval = undefined
+      }
+
+      function rotate() {
+        window.rotateInterval = startRotate()
+      }
+
+      function explode() {
+        if (exploded) {
+          document.querySelectorAll('.face').forEach(n => n.classList.remove('exploded'))
+          exploded = false
+        } else {
+          document.querySelectorAll('.face').forEach(n => n.classList.add('exploded'))
+          exploded = true
+        }
+      }
+
+      setViewport()
+      rotate()
+
+      document.getElementById('play').addEventListener('click', rotate)
+      document.getElementById('pause').addEventListener('click', reset)
+      document.getElementById('explode').addEventListener('click', explode)
+
+      document.getElementById('reset').addEventListener('click', () => {
+        reset()
+        cube.style.transform = `rotateX(0) rotateY(0) rotateZ(0)`
+      })
+    </script>
+  </body>
+</html>
